@@ -1,0 +1,24 @@
+# Large local recordings — keep teaching HTML/images only
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Python / build junk
+__pycache__/
+*.pyc
+.Python
+.venv/
+venv/
+
+# Temp / compose scratch
+concepts/images/_tmp/
+_yt_*/
+_yt_frame_*.jpg
+
+# OS / editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/

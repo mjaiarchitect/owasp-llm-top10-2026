@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>OWASP LLM Top 10 2026 — AI Threat Architecture</title>
+  <meta name="description" content="OWASP LLM Top 10 2026 — five-zone security map with all ten risks pinned." />
+  <style>
+    :root {
+      --ink: #07151c;
+      --panel: #102a38;
+      --line: rgba(232, 241, 245, 0.14);
+      --text: #e8f1f5;
+      --muted: #a8bbc6;
+      --teal: #2ec4b6;
+      --teal-dim: rgba(46, 196, 182, 0.14);
+      --amber: #f0b429;
+      --amber-dim: rgba(240, 180, 41, 0.14);
+      --crimson: #ef5d5d;
+      --crimson-dim: rgba(239, 93, 93, 0.14);
+      --max: 1280px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--ink);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 1.125rem;
+    }
+    a { color: var(--teal); text-underline-offset: 3px; }
+    a:hover { color: #7fe8de; }
+    :focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+    .skip {
+      position: absolute; left: -999px; top: 0;
+      background: var(--teal); color: #04201d; padding: 0.5rem 1rem; z-index: 100;
+    }
+    .skip:focus { left: 0.5rem; top: 0.5rem; }
+
+    .wrap { width: min(100% - 2.5rem, var(--max)); margin-inline: auto; }
+
+    section { padding: 1.5rem 0 1.25rem; }
+    footer {
+      padding: 0 0 2.5rem;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+    footer a { color: var(--teal); }
+    .simple-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1.15fr auto 1fr;
+      grid-template-areas:
+        ".       uparr   train   uparr2  ."
+        "input   larr    brain   rarr    output"
+        ".       dnarr   connect dnarr2  .";
+      gap: 0.65rem 0.75rem;
+      align-items: stretch;
+      margin: 0.85rem 0 1rem;
+      padding: 1.35rem 1.15rem 1.5rem;
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+      background:
+        radial-gradient(ellipse 45% 55% at 50% 48%, rgba(46,196,182,0.1), transparent 65%),
+        #041018;
+    }
+    .sf-input { grid-area: input; }
+    .sf-brain { grid-area: brain; }
+    .sf-output { grid-area: output; }
+    .sf-train { grid-area: train; }
+    .sf-connect { grid-area: connect; }
+    .sf-larr { grid-area: larr; }
+    .sf-rarr { grid-area: rarr; }
+    .sf-uparr { grid-area: uparr; }
+    .sf-uparr2 { grid-area: uparr2; }
+    .sf-dnarr { grid-area: dnarr; }
+    .sf-dnarr2 { grid-area: dnarr2; }
+
+    @media (max-width: 900px) {
+      .simple-flow {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "train"
+          "uparr"
+          "input"
+          "larr"
+          "brain"
+          "rarr"
+          "output"
+          "dnarr"
+          "connect";
+      }
+      .sf-uparr2, .sf-dnarr2 { display: none; }
+      .sf-larr .shaft, .sf-rarr .shaft { transform: rotate(90deg); }
+    }
+
+    .simple-box {
+      display: flex; flex-direction: column; justify-content: center; gap: 0.4rem;
+      padding: 1.15rem 1.2rem;
+      border-radius: 0.7rem;
+      border: 2px solid var(--line);
+      background: rgba(16, 42, 56, 0.75);
+      min-height: 7.5rem;
+    }
+    .simple-box.brain {
+      border-color: rgba(46,196,182,0.6);
+      background: linear-gradient(165deg, rgba(28,90,88,0.5), rgba(16,42,56,0.95));
+      align-items: center; text-align: center;
+      min-height: 10rem;
+    }
+    .simple-box.train {
+      border-color: rgba(240,180,41,0.45);
+      background: rgba(240,180,41,0.08);
+      min-height: 6.5rem;
+    }
+    .simple-box.connect {
+      border-color: rgba(239,93,93,0.4);
+      background: rgba(239,93,93,0.08);
+      min-height: 6.5rem;
+    }
+    .simple-box .tag {
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--teal);
+    }
+    .simple-box.train .tag { color: var(--amber); }
+    .simple-box.connect .tag { color: var(--crimson); }
+    .simple-box.brain .tag { color: #7fe8de; }
+    .simple-box h3 {
+      margin: 0; font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+      letter-spacing: -0.02em; color: var(--text); font-weight: 700;
+    }
+    .simple-box p {
+      margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.4;
+    }
+    .simple-box .chips {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.25rem;
+    }
+    .simple-box .chips span {
+      font-size: 0.88rem; font-weight: 600; color: var(--text);
+      padding: 0.25rem 0.55rem; border-radius: 0.35rem;
+      border: 1px solid var(--line); background: rgba(0,0,0,0.25);
+    }
+    .simple-box.brain .owasp-pins { justify-content: center; }
+    .owasp-pins {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.45rem;
+    }
+    a.owasp-pin {
+      display: inline-flex; flex-direction: column; gap: 0.1rem;
+      text-decoration: none; min-width: 6.5rem; max-width: 14rem;
+      padding: 0.4rem 0.55rem; border-radius: 0.4rem;
+      border: 1px solid rgba(239,93,93,0.55);
+      background: var(--crimson-dim); color: #ffc8c8;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    a.owasp-pin:hover {
+      background: rgba(239,93,93,0.28); border-color: var(--crimson); color: #fff;
+    }
+    a.owasp-pin strong {
+      font-size: 0.82rem; letter-spacing: 0.04em; color: #fff; font-weight: 800;
+    }
+    a.owasp-pin em {
+      font-style: normal; font-size: 0.78rem; font-weight: 600; color: #ffd0d0; line-height: 1.25;
+    }
+    .simple-box.brain a.owasp-pin { text-align: left; }
+    .brain-icon {
+      width: 3.25rem; height: 3.25rem; margin: 0.15rem auto 0.2rem;
+      border-radius: 50%;
+      border: 2px solid var(--teal);
+      background:
+        radial-gradient(circle at 35% 35%, rgba(127,232,222,0.35), transparent 55%),
+        rgba(6, 30, 36, 0.9);
+      position: relative;
+    }
+    .brain-icon::before,
+    .brain-icon::after {
+      content: ""; position: absolute;
+      border-radius: 50%; border: 1.5px solid rgba(46,196,182,0.55);
+    }
+    .brain-icon::before {
+      inset: 22%; border-right-color: transparent; border-bottom-color: transparent;
+      transform: rotate(-20deg);
+    }
+    .brain-icon::after {
+      inset: 35%; background: var(--teal); border: 0; opacity: 0.85;
+      width: 0.45rem; height: 0.45rem; margin: auto;
+    }
+    .simple-arrow {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.2rem; color: var(--teal); font-weight: 700; font-size: 0.82rem;
+      align-self: center; text-align: center; min-width: 2.75rem;
+    }
+    .simple-arrow .shaft {
+      font-size: 1.55rem; line-height: 1; color: var(--teal);
+    }
+    .simple-arrow.amber { color: var(--amber); }
+    .simple-arrow.amber .shaft { color: var(--amber); }
+    .simple-arrow.crimson { color: var(--crimson); }
+    .simple-arrow.crimson .shaft { color: var(--crimson); }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    .related {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 0 0 1rem;
+    }
+    .related a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: #04201d;
+      background: var(--teal);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.98rem;
+      padding: 0.7rem 1.05rem;
+      border-radius: 0.45rem;
+    }
+    .related a:hover { filter: brightness(1.08); color: #04201d; }
+    .related a span {
+      color: rgba(4, 32, 29, 0.72);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    @media print {
+      body { background: #fff; color: #111; font-size: 11pt; }
+      .skip { display: none; }
+      a { color: #0645ad; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <main id="main">
+    <section id="simple">
+      <div class="wrap">
+        <nav class="related" aria-label="Related security concepts">
+          <a href="concepts/security-intuition.html">Security intuition <span>two extremes</span></a>
+          <a href="concepts/infant-security-learning.html">Infant security learning <span>how safe starts</span></a>
+        </nav>
+        <div
+          class="simple-flow"
+          role="img"
+          aria-label="Five security zones with OWASP LLM Top 10 2026 pinned: Training LLM04 LLM05, Input LLM01, Brain LLM08 LLM06, Output LLM02 LLM10 LLM07, Connections LLM03 LLM09"
+        >
+          <div class="simple-arrow amber sf-uparr" aria-hidden="true">
+            <span>shaped by</span>
+            <span class="shaft">↓</span>
+          </div>
+          <div class="simple-arrow amber sf-uparr2" aria-hidden="true">
+            <span class="shaft">↓</span>
+          </div>
+
+          <article class="simple-box train sf-train">
+            <span class="tag">Top · What you buy into the stack</span>
+            <h3>Supply &amp; training inputs</h3>
+            <p>Third-party models, datasets, adapters, and the data that shapes the brain.</p>
+            <div class="owasp-pins">
+              <a class="owasp-pin" href="concepts/owasp-llm04-supply-chain.html"><strong>LLM04</strong><em>Supply Chain</em></a>
+              <a class="owasp-pin" href="concepts/owasp-llm05-data-poisoning.html"><strong>LLM05</strong><em>Data and Model Poisoning</em></a>
+            </div>
+          </article>
+
+          <article class="simple-box sf-input">
+            <span class="tag">1 · Input</span>
+            <h3>User input</h3>
+            <p>Prompts, tickets, pasted docs entering context.</p>
+            <div class="owasp-pins">
+              <a class="owasp-pin" href="concepts/owasp-llm01-prompt-injection.html"><strong>LLM01</strong><em>Prompt Injection</em></a>
+            </div>
+          </article>
+
+          <div class="simple-arrow sf-larr" aria-hidden="true">
+            <span>in</span>
+            <span class="shaft">→</span>
+          </div>
+
+          <article class="simple-box brain sf-brain">
+            <span class="tag">2 · LLM</span>
+            <div class="brain-icon" aria-hidden="true"></div>
+            <h3>LLM brain</h3>
+            <p>The trained neural network itself.</p>
+            <div class="owasp-pins">
+              <a class="owasp-pin" href="concepts/owasp-llm08-hidden-context-exposure.html"><strong>LLM08</strong><em>Hidden Context Exposure</em></a>
+              <a class="owasp-pin" href="concepts/owasp-llm06-unbounded-consumption.html"><strong>LLM06</strong><em>Unbounded Consumption</em></a>
+            </div>
+          </article>
+
+          <div class="simple-arrow sf-rarr" aria-hidden="true">
+            <span>out</span>
+            <span class="shaft">→</span>
+          </div>
+
+          <article class="simple-box sf-output">
+            <span class="tag">3 · Output</span>
+            <h3>Generated output</h3>
+            <p>Text, citations, UI replies leaving the model.</p>
+            <div class="owasp-pins">
+              <a class="owasp-pin" href="concepts/owasp-llm02-sensitive-disclosure.html"><strong>LLM02</strong><em>Sensitive Information Disclosure</em></a>
+              <a class="owasp-pin" href="concepts/owasp-llm10-improper-output.html"><strong>LLM10</strong><em>Improper Output Handling</em></a>
+              <a class="owasp-pin" href="concepts/owasp-llm07-misinformation.html"><strong>LLM07</strong><em>Misinformation</em></a>
+            </div>
+          </article>
+
+          <div class="simple-arrow crimson sf-dnarr" aria-hidden="true">
+            <span class="shaft">↑</span>
+            <span>acts via</span>
+          </div>
+          <div class="simple-arrow crimson sf-dnarr2" aria-hidden="true">
+            <span class="shaft">↑</span>
+          </div>
+
+          <article class="simple-box connect sf-connect">
+            <span class="tag">Bottom · LLM connected to</span>
+            <h3>Connection layer</h3>
+            <p>Tools, vector DB, agents — whatever auth allows.</p>
+            <div class="owasp-pins">
+              <a class="owasp-pin" href="concepts/owasp-llm03-excessive-agency.html"><strong>LLM03</strong><em>Excessive Agency</em></a>
+              <a class="owasp-pin" href="concepts/owasp-llm09-vector-weakness.html"><strong>LLM09</strong><em>Vector and Embedding Weaknesses</em></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap">
+      OWASP (Open Worldwide Application Security Project) · LLM Top 10 2026 ·
+      <a href="https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/" target="_blank" rel="noopener">genai.owasp.org/resource/owasp-genai-llm-top-10-2026</a>
+    </div>
+  </footer>
+</body>
+</html>

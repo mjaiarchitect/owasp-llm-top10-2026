@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LLM08 — Hidden Context Exposure — Concept</title>
+  <style>
+    :root { --ink:#07151c; --text:#e8f1f5; --muted:#a8bbc6; --teal:#2ec4b6; --line:rgba(232,241,245,0.14); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:"Segoe UI",system-ui,sans-serif; background:var(--ink); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.5rem; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+    a.back { color:#04201d; background:var(--teal); text-decoration:none; font-weight:700; padding:0.65rem 1.1rem; border-radius:0.45rem; }
+    a.back:hover { filter:brightness(1.08); }
+    .meta { color:var(--muted); font-size:0.95rem; }
+    h1 { font-size:clamp(1.25rem,2.5vw,1.75rem); letter-spacing:-0.02em; }
+    main { flex:1; padding:1.25rem 1.5rem 2rem; display:flex; flex-direction:column; gap:1rem; max-width:1600px; margin:0 auto; width:100%; }
+    .lead { color:var(--muted); max-width:56rem; line-height:1.55; font-size:1.05rem; }
+    .how { max-width:56rem; line-height:1.55; font-size:1.05rem; padding:0.85rem 1rem; border:1px solid var(--line); border-radius:0.55rem; background:rgba(46,196,182,0.06); }
+    .how strong { color:var(--teal); display:block; margin-bottom:0.35rem; font-size:0.95rem; letter-spacing:0.01em; }
+    .how p { color:var(--text); margin:0; }
+    figure { margin:0; border:1px solid var(--line); border-radius:0.75rem; overflow:hidden; background:#041018; }
+    img { width:100%; height:auto; display:block; }
+
+    details.notes { max-width:56rem; border:1px solid var(--line); border-radius:0.55rem; background:rgba(46,196,182,0.05); }
+    details.notes > summary { cursor:pointer; list-style:none; display:flex; align-items:center; gap:0.65rem; padding:0.7rem 1rem; color:var(--text); font-weight:700; user-select:none; }
+    details.notes > summary::-webkit-details-marker { display:none; }
+    details.notes > summary .sign { display:inline-flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem; border-radius:0.3rem; background:var(--teal); color:#04201d; font-size:1.15rem; line-height:1; flex-shrink:0; }
+    details.notes > summary .sign::before { content:"+"; }
+    details.notes[open] > summary .sign::before { content:"\2212"; }
+    details.notes > summary .hint { color:var(--muted); font-weight:500; font-size:0.9rem; }
+    .notes-body { padding:0 1rem 1rem; display:flex; flex-direction:column; gap:0.85rem; }
+    .notes-body .lead { max-width:none; }
+    .notes-body .how { max-width:none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <p class="meta">OWASP (Open Worldwide Application Security Project) LLM Top 10 2026</p>
+      <h1>LLM08 — Hidden Context Exposure</h1>
+    </div>
+    <a class="back" href="../owasp-llm-top10.html#simple">← Back</a>
+  </header>
+  <main>
+    <details class="notes">
+      <summary><span class="sign" aria-hidden="true"></span> Details <span class="hint">(click to expand)</span></summary>
+      <div class="notes-body">
+        <p class="lead">Hidden, non-user-facing context (system/developer instructions, tool schemas, retrieved policy text, role rules) is extracted or inferred. Assume discoverability: put no secrets in hidden context; enforce authorization and content policy outside the model.</p>
+        <div class="how">
+        <strong>How hacker manage to do that?</strong>
+        <p>They craft prompts that dump or reconstruct system instructions, tool schemas, and policy text you thought were private. Watch secrets and privileged rules stored only in the system prompt instead of outside the model.</p>
+        </div>
+        <p class="lead">Diagram (aligned BEFORE → AFTER columns): compare secrets embedded in the system prompt and dumped by the model with a split design—role rules only in the prompt, secrets in a server-side store used by backend code, plus output canary checks and deny-and-alert. Gold <strong style="color:var(--text)">NEW</strong> highlights mark controls added outside the model; AFTER keeps secrets out of model context so they cannot be disclosed.</p>
+      </div>
+    </details>
+    <figure>
+      <img src="images/owasp-llm08-hidden-context-exposure.jpg" width="2560" height="1440" alt="LLM08 Hidden Context Exposure: top unsafe system-prompt disclosure workflow, bottom safe server-side secrets store, output policy, and alert workflow" />
+    </figure>
+  </main>
+</body>
+</html>
